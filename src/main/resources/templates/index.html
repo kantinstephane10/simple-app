@@ -8,18 +8,13 @@
 <body>
     <main class="card">
         <h1>Simple Counter App</h1>
-        <p class="count" th:text="${count}">0</p>
+        <p class="count" id="count" th:text="${count}">0</p>
         <div class="actions">
-            <form th:action="@{/decrement}" method="post">
-                <button type="submit">-</button>
-            </form>
-            <form th:action="@{/reset}" method="post">
-                <button type="submit">Reset</button>
-            </form>
-            <form th:action="@{/increment}" method="post">
-                <button type="submit">+</button>
-            </form>
+            <button type="button" id="dec" aria-label="Decrement">-</button>
+            <button type="button" id="reset">Reset</button>
+            <button type="button" id="inc" aria-label="Increment">+</button>
         </div>
     </main>
+    <script th:src="@{/app.js}"></script>
 </body>
 </html>

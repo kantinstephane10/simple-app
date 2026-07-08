@@ -1,17 +1,52 @@
+:root {
+    --page-bg: #eef0f3;
+    --page-fg: #2b2f36;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(0, 0, 0, 0.12);
+    --count-color: #1a1a1a;
+    --btn-border: #c7cede;
+    --btn-bg: #f4f6fb;
+    --btn-bg-hover: #e5eaf7;
+    --btn-bg-active: #d3dcf3;
+    --btn-text: #2b2f36;
+    --accent: #46567a;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --page-bg: #14161a;
+        --page-fg: #e7e9ee;
+        --card-bg: #21232a;
+        --card-shadow: rgba(0, 0, 0, 0.5);
+        --count-color: #f5f6f8;
+        --btn-border: #3a3f4c;
+        --btn-bg: #2b2e38;
+        --btn-bg-hover: #343846;
+        --btn-bg-active: #3d4152;
+        --btn-text: #e7e9ee;
+        --accent: #8fa3d6;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #eef0f3;
+    background: var(--page-bg);
+    color: var(--page-fg);
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 .card {
-    background: #ffffff;
+    background: var(--card-bg);
     border-radius: 12px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 12px 30px var(--card-shadow);
     padding: 32px 40px;
     text-align: center;
     width: 280px;
@@ -20,15 +55,27 @@ body {
 h1 {
     font-size: 18px;
     margin: 0 0 16px;
-    color: #2b2f36;
+    color: var(--page-fg);
+    font-weight: 600;
 }
 
 .count {
     font-size: 56px;
     font-weight: 700;
     margin: 0 0 24px;
-    color: #1a1a1a;
+    color: var(--count-color);
     font-variant-numeric: tabular-nums;
+    transition: transform 0.15s ease;
+}
+
+.count.pulse {
+    transform: scale(1.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .count {
+        transition: none;
+    }
 }
 
 .actions {
@@ -37,25 +84,27 @@ h1 {
     gap: 8px;
 }
 
-.actions form {
-    margin: 0;
-}
-
 button {
     width: 100%;
     padding: 10px 0;
     font-size: 15px;
-    border: 1px solid #c7cede;
+    border: 1px solid var(--btn-border);
     border-radius: 6px;
-    background: #f4f6fb;
-    color: #2b2f36;
+    background: var(--btn-bg);
+    color: var(--btn-text);
     cursor: pointer;
+    font-family: inherit;
 }
 
 button:hover {
-    background: #e5eaf7;
+    background: var(--btn-bg-hover);
 }
 
 button:active {
-    background: #d3dcf3;
+    background: var(--btn-bg-active);
+}
+
+button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
