@@ -1,16 +1,23 @@
 # Simple App
 
-A tiny Java Swing desktop app with a counter UI (increment, decrement, reset).
+A tiny Java web app built with Spring Boot: a counter page with increment, decrement, and reset buttons.
 
 ## Requirements
 
-- JDK 11 or later
+- JDK 17 or later
+- Maven
 
 ## Build & Run
 
 ```bash
-javac -d out src/main/java/app/Main.java
-java -cp out app.Main
+mvn spring-boot:run
 ```
 
-A window will open with a counter and `+`, `-`, and `Reset` buttons.
+Then open [http://localhost:8080](http://localhost:8080) in your browser.
+
+## Build a runnable jar
+
+```bash
+mvn clean package
+java -jar target/simple-app-1.0.0.jar
+```
