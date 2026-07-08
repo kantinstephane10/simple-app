@@ -15,7 +15,10 @@ public class PageController {
 
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("count", counterState.get());
+        CounterState.Snapshot snapshot = counterState.get();
+        model.addAttribute("count", snapshot.count());
+        model.addAttribute("best", snapshot.best());
+        model.addAttribute("totalClicks", snapshot.totalClicks());
         return "index";
     }
 }

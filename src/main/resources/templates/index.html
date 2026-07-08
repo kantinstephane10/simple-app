@@ -6,7 +6,7 @@
     <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 <body>
-    <main class="card">
+    <main class="card" id="card">
         <h1>Simple Counter App</h1>
         <p class="count" id="count" th:text="${count}">0</p>
         <div class="actions">
@@ -14,7 +14,17 @@
             <button type="button" id="reset">Reset</button>
             <button type="button" id="inc" aria-label="Increment">+</button>
         </div>
+        <p class="stats">
+            Best <span id="best" th:text="${best}">0</span>
+            &middot;
+            Clicks <span id="clicks" th:text="${totalClicks}">0</span>
+        </p>
+        <p class="hint">Arrow keys to count, R to reset</p>
     </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <canvas id="confetti"></canvas>
+
     <script th:src="@{/app.js}"></script>
 </body>
 </html>

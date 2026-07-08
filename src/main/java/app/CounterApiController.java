@@ -16,25 +16,22 @@ public class CounterApiController {
     }
 
     @GetMapping
-    public CounterResponse get() {
-        return new CounterResponse(counterState.get());
+    public CounterState.Snapshot get() {
+        return counterState.get();
     }
 
     @PostMapping("/increment")
-    public CounterResponse increment() {
-        return new CounterResponse(counterState.increment());
+    public CounterState.Snapshot increment() {
+        return counterState.increment();
     }
 
     @PostMapping("/decrement")
-    public CounterResponse decrement() {
-        return new CounterResponse(counterState.decrement());
+    public CounterState.Snapshot decrement() {
+        return counterState.decrement();
     }
 
     @PostMapping("/reset")
-    public CounterResponse reset() {
-        return new CounterResponse(counterState.reset());
-    }
-
-    public record CounterResponse(int count) {
+    public CounterState.Snapshot reset() {
+        return counterState.reset();
     }
 }
