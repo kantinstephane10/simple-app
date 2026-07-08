@@ -35,100 +35,248 @@
 body {
     margin: 0;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background: var(--page-bg);
     color: var(--page-fg);
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
 }
 
-.card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    box-shadow: 0 12px 30px var(--card-shadow);
-    padding: 32px 40px;
-    text-align: center;
-    width: 280px;
-    transition: box-shadow 0.3s ease;
+.page {
+    flex: 1;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .card {
-        transition: none;
-    }
+.top-bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
 }
 
-h1 {
-    font-size: 18px;
-    margin: 0 0 16px;
-    color: var(--page-fg);
+.top-bar h1 {
+    font-size: 20px;
+    margin: 0;
     font-weight: 600;
 }
 
-.count {
-    font-size: 56px;
-    font-weight: 700;
-    margin: 0 0 24px;
-    color: var(--count-color);
-    font-variant-numeric: tabular-nums;
-    transition: transform 0.15s ease;
+.top-bar nav a,
+.about-card a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 14px;
 }
 
-.count.pulse {
-    transform: scale(1.12);
+.top-bar nav a:hover,
+.about-card a:hover {
+    text-decoration: underline;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .count {
-        transition: none;
-    }
-}
-
-.actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+.add-counter {
+    display: flex;
     gap: 8px;
 }
 
-button {
-    width: 100%;
-    padding: 10px 0;
-    font-size: 15px;
+.add-counter input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 14px;
     border: 1px solid var(--btn-border);
     border-radius: 6px;
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    cursor: pointer;
+    background: var(--card-bg);
+    color: var(--page-fg);
     font-family: inherit;
 }
 
-button:hover {
-    background: var(--btn-bg-hover);
-}
-
-button:active {
-    background: var(--btn-bg-active);
-}
-
+.add-counter input:focus-visible,
 button:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
+.add-counter button,
+.counters button {
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--btn-border);
+    border-radius: 6px;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+}
+
+.add-counter button {
+    padding: 10px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.add-counter button:hover {
+    background: var(--btn-bg-hover);
+}
+
+.counters {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.counter-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px 22px;
+    text-align: center;
+    transition: box-shadow 0.3s ease;
+}
+
+@keyframes pop {
+    0% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+.counter-card.just-updated .count {
+    animation: pop 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .counter-card {
+        transition: none;
+    }
+    .counter-card.just-updated .count {
+        animation: none;
+    }
+}
+
+.counter-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.counter-name {
+    font-size: 14px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.remove-btn {
+    border: none;
+    background: none;
+    color: var(--page-fg);
+    opacity: 0.4;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 6px;
+}
+
+.remove-btn:hover {
+    opacity: 1;
+}
+
+.count {
+    font-size: 44px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    color: var(--count-color);
+    font-variant-numeric: tabular-nums;
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+}
+
+.counters button {
+    width: 100%;
+    padding: 8px 0;
+    font-size: 14px;
+}
+
+.counters button:hover {
+    background: var(--btn-bg-hover);
+}
+
+.counters button:active {
+    background: var(--btn-bg-active);
+}
+
 .stats {
-    margin: 18px 0 4px;
-    font-size: 13px;
+    margin: 12px 0 0;
+    font-size: 12px;
     color: var(--page-fg);
     opacity: 0.65;
     font-variant-numeric: tabular-nums;
 }
 
-.hint {
+.activity h2 {
+    font-size: 15px;
+    margin: 0 0 10px;
+    font-weight: 600;
+}
+
+.activity-list {
+    list-style: none;
     margin: 0;
-    font-size: 11px;
-    color: var(--page-fg);
-    opacity: 0.4;
+    padding: 0;
+    background: var(--card-bg);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.activity-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--btn-border);
+}
+
+.activity-list li:last-child {
+    border-bottom: none;
+}
+
+.activity-empty {
+    opacity: 0.5;
+}
+
+.activity-name {
+    font-weight: 600;
+}
+
+.activity-action {
+    opacity: 0.75;
+}
+
+.activity-result {
+    font-variant-numeric: tabular-nums;
+}
+
+.activity-time {
+    margin-left: auto;
+    opacity: 0.45;
+    white-space: nowrap;
+}
+
+.site-footer {
+    text-align: center;
+    padding: 16px 20px 28px;
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.site-footer a {
+    color: inherit;
 }
 
 #confetti {
@@ -164,4 +312,30 @@ button:focus-visible {
     .toast {
         transition: none;
     }
+}
+
+.about-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 28px 32px;
+}
+
+.about-card h2 {
+    font-size: 15px;
+    margin: 24px 0 8px;
+}
+
+.about-card h2:first-child {
+    margin-top: 0;
+}
+
+.about-card p,
+.about-card ul {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 8px;
+}
+
+.about-card ul {
+    padding-left: 20px;
 }

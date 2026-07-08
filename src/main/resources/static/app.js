@@ -1,12 +1,15 @@
-const countEl = document.getElementById('count');
-const bestEl = document.getElementById('best');
-const clicksEl = document.getElementById('clicks');
-const card = document.getElementById('card');
+const countersEl = document.getElementById('counters');
+const activityListEl = document.getElementById('activity-list');
+const addForm = document.getElementById('add-counter-form');
+const newCounterNameInput = document.getElementById('new-counter-name');
 const toast = document.getElementById('toast');
 const canvas = document.getElementById('confetti');
 const ctx = canvas.getContext('2d');
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let activeCounterId = null;
+let justUpdatedId = null;
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -15,18 +18,68 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-function applyMood(count) {
+function moodShadow(count) {
     const magnitude = Math.min(Math.abs(count), 50);
     const hue = count >= 0 ? 150 - magnitude : 10 + magnitude;
     const alpha = (0.15 + (magnitude / 50) * 0.35).toFixed(2);
-    card.style.boxShadow = `0 12px 30px var(--card-shadow), 0 0 0 3px hsl(${hue} 70% 55% / ${alpha})`;
+    return `0 12px 30px var(--card-shadow), 0 0 0 3px hsl(${hue} 70% 55% / ${alpha})`;
 }
 
-function flip() {
-    if (prefersReducedMotion) return;
-    countEl.classList.remove('pulse');
-    void countEl.offsetWidth;
-    countEl.classList.add('pulse');
+function escapeHtml(value) {
+    const div = document.createElement('div');
+    div.textContent = value;
+    return div.innerHTML;
+}
+
+function counterCardHtml(counter) {
+    const justUpdatedClass = counter.id === justUpdatedId ? ' just-updated' : '';
+    return `
+        <div class="counter-card${justUpdatedClass}" data-id="${counter.id}" style="box-shadow: ${moodShadow(counter.count)}">
+            <div class="counter-head">
+                <span class="counter-name">${escapeHtml(counter.name)}</span>
+                <button type="button" class="remove-btn" aria-label="Remove ${escapeHtml(counter.name)}">&times;</button>
+            </div>
+            <p class="count">${counter.count}</p>
+            <div class="actions">
+                <button type="button" class="dec" aria-label="Decrement">-</button>
+                <button type="button" class="reset">Reset</button>
+                <button type="button" class="inc" aria-label="Increment">+</button>
+            </div>
+            <p class="stats">Best ${counter.best} &middot; Clicks ${counter.totalClicks}</p>
+        </div>
+    `;
+}
+
+function renderCounters(counters) {
+    countersEl.innerHTML = counters.map(counterCardHtml).join('');
+    if (!counters.some((c) => c.id === activeCounterId)) {
+        activeCounterId = counters.length ? counters[0].id : null;
+    }
+}
+
+function timeAgo(timestamp) {
+    const seconds = Math.max(0, Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000));
+    if (seconds < 5) return 'just now';
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+}
+
+function renderActivity(entries) {
+    if (!entries.length) {
+        activityListEl.innerHTML = '<li class="activity-empty">No activity yet</li>';
+        return;
+    }
+    activityListEl.innerHTML = entries.map((entry) => `
+        <li>
+            <span class="activity-name">${escapeHtml(entry.counterName)}</span>
+            <span class="activity-action">${escapeHtml(entry.action)}</span>
+            <span class="activity-result">&rarr; ${entry.resultingCount}</span>
+            <span class="activity-time">${timeAgo(entry.timestamp)}</span>
+        </li>
+    `).join('');
 }
 
 let toastTimeout;
@@ -80,40 +133,78 @@ function burstConfetti() {
     requestAnimationFrame(frame);
 }
 
-function render(snapshot) {
-    countEl.textContent = snapshot.count;
-    bestEl.textContent = snapshot.best;
-    clicksEl.textContent = snapshot.totalClicks;
-    flip();
-    applyMood(snapshot.count);
-    if (snapshot.milestone) {
-        showToast(`Milestone reached: ${snapshot.count}`);
+async function api(path, options) {
+    const response = await fetch(path, options);
+    if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || `Request to ${path} failed: ${response.status}`);
+    }
+    return response.status === 204 ? null : response.json();
+}
+
+async function loadAll() {
+    const [counters, activity] = await Promise.all([
+        api('/api/counters'),
+        api('/api/counters/activity'),
+    ]);
+    renderCounters(counters);
+    renderActivity(activity);
+}
+
+async function act(id, action) {
+    const counter = await api(`/api/counters/${id}/${action}`, { method: 'POST' });
+    activeCounterId = id;
+    justUpdatedId = id;
+    await loadAll();
+    if (counter.milestone) {
+        showToast(`${counter.name}: milestone reached (${counter.count})`);
         burstConfetti();
     }
 }
 
-async function callApi(path) {
-    const response = await fetch(path, { method: 'POST' });
-    if (!response.ok) {
-        throw new Error(`Request to ${path} failed: ${response.status}`);
-    }
-    render(await response.json());
-}
+countersEl.addEventListener('click', (event) => {
+    const card = event.target.closest('.counter-card');
+    if (!card) return;
+    const id = card.dataset.id;
+    activeCounterId = id;
 
-document.getElementById('inc').addEventListener('click', () => callApi('/api/counter/increment'));
-document.getElementById('dec').addEventListener('click', () => callApi('/api/counter/decrement'));
-document.getElementById('reset').addEventListener('click', () => callApi('/api/counter/reset'));
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
-        event.preventDefault();
-        callApi('/api/counter/increment');
-    } else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
-        event.preventDefault();
-        callApi('/api/counter/decrement');
-    } else if (event.key === 'r' || event.key === 'R') {
-        callApi('/api/counter/reset');
+    if (event.target.closest('.inc')) {
+        act(id, 'increment');
+    } else if (event.target.closest('.dec')) {
+        act(id, 'decrement');
+    } else if (event.target.closest('.reset')) {
+        act(id, 'reset');
+    } else if (event.target.closest('.remove-btn')) {
+        api(`/api/counters/${id}`, { method: 'DELETE' })
+            .then(loadAll)
+            .catch((err) => showToast(err.message));
     }
 });
 
-applyMood(Number(countEl.textContent));
+addForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const name = newCounterNameInput.value.trim();
+    newCounterNameInput.value = '';
+    api('/api/counters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+    }).then(loadAll);
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.target.tagName === 'INPUT') return;
+    if (!activeCounterId) return;
+
+    if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        act(activeCounterId, 'increment');
+    } else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        act(activeCounterId, 'decrement');
+    } else if (event.key === 'r' || event.key === 'R') {
+        act(activeCounterId, 'reset');
+    }
+});
+
+loadAll();

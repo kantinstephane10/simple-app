@@ -6,21 +6,35 @@
     <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 <body>
-    <main class="card" id="card">
-        <h1>Simple Counter App</h1>
-        <p class="count" id="count" th:text="${count}">0</p>
-        <div class="actions">
-            <button type="button" id="dec" aria-label="Decrement">-</button>
-            <button type="button" id="reset">Reset</button>
-            <button type="button" id="inc" aria-label="Increment">+</button>
-        </div>
-        <p class="stats">
-            Best <span id="best" th:text="${best}">0</span>
+    <div class="page">
+        <header class="top-bar">
+            <h1>Simple Counter App</h1>
+            <nav>
+                <a th:href="@{/about}">About</a>
+            </nav>
+        </header>
+
+        <form id="add-counter-form" class="add-counter">
+            <input type="text" id="new-counter-name" placeholder="New counter name" maxlength="40" autocomplete="off">
+            <button type="submit">Add counter</button>
+        </form>
+
+        <div class="counters" id="counters"></div>
+
+        <section class="activity">
+            <h2>Recent activity</h2>
+            <ul class="activity-list" id="activity-list"></ul>
+        </section>
+    </div>
+
+    <footer class="site-footer">
+        <p>
+            Built with Spring Boot &amp; vanilla JS &middot;
+            <a href="https://github.com/kantinstephane10/simple-app" target="_blank" rel="noopener">Source on GitHub</a>
             &middot;
-            Clicks <span id="clicks" th:text="${totalClicks}">0</span>
+            <a th:href="@{/actuator/health}">Health</a>
         </p>
-        <p class="hint">Arrow keys to count, R to reset</p>
-    </main>
+    </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <canvas id="confetti"></canvas>

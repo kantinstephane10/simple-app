@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>About — Simple Counter App</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+    <div class="page">
+        <header class="top-bar">
+            <h1>About</h1>
+            <nav>
+                <a th:href="@{/}">&larr; Back to counters</a>
+            </nav>
+        </header>
+
+        <article class="about-card">
+            <h2>What this is</h2>
+            <p>
+                A small dashboard for keeping one or more counters, built to exercise a full
+                build-and-deploy pipeline: Spring Boot on the backend, vanilla JavaScript on the
+                front end, packaged by Maven and shipped through CodeBuild, CodeDeploy, and nginx
+                on EC2.
+            </p>
+
+            <h2>Keyboard shortcuts</h2>
+            <p>These apply to whichever counter you last interacted with:</p>
+            <ul>
+                <li><strong>&uarr; / &rarr;</strong> &mdash; increment</li>
+                <li><strong>&darr; / &larr;</strong> &mdash; decrement</li>
+                <li><strong>R</strong> &mdash; reset</li>
+            </ul>
+
+            <h2>How state works</h2>
+            <p>
+                Counters live in your browser session, not a database &mdash; they reset if your
+                session expires or you switch browsers. Each counter tracks its own current value,
+                best value reached, and total click count, and every action is recorded in the
+                activity feed on the main page.
+            </p>
+
+            <h2>Tech stack</h2>
+            <ul>
+                <li>Java 17 + Spring Boot (Web, Thymeleaf, Actuator)</li>
+                <li>Vanilla JavaScript &mdash; no frontend framework or build step</li>
+                <li>Maven for packaging</li>
+            </ul>
+        </article>
+
+        <footer class="site-footer">
+            <p>
+                <a href="https://github.com/kantinstephane10/simple-app" target="_blank" rel="noopener">Source on GitHub</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
