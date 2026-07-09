@@ -43,7 +43,8 @@ Extras:
 mvn spring-boot:run
 ```
 
-Then open [http://localhost:8080](http://localhost:8080) in your browser.
+Then open [http://localhost:5000](http://localhost:5000) in your browser (the app listens on 5000 by
+default; set the `PORT` environment variable to override).
 
 ## Build a runnable jar
 
