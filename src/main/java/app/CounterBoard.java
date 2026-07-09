@@ -69,6 +69,14 @@ public class CounterBoard {
         return counter;
     }
 
+    public synchronized Counter rename(String id, String newName) {
+        Counter counter = require(id);
+        String previousName = counter.getName();
+        counter.rename(newName);
+        log(previousName + " -> " + newName, "Renamed", counter.getCount());
+        return counter;
+    }
+
     public synchronized List<ActivityEntry> recentActivity() {
         return new ArrayList<>(activity);
     }

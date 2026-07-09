@@ -3,7 +3,7 @@ package app;
 public class Counter {
 
     private final String id;
-    private final String name;
+    private String name;
     private int count;
     private int best;
     private int totalClicks;
@@ -11,6 +11,10 @@ public class Counter {
     public Counter(String id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public void rename(String newName) {
+        this.name = newName;
     }
 
     public void increment() {

@@ -10,6 +10,7 @@
         <header class="top-bar">
             <h1>About</h1>
             <nav>
+                <button type="button" id="theme-toggle" class="theme-toggle">Dark mode</button>
                 <a th:href="@{/}">&larr; Back to counters</a>
             </nav>
         </header>
@@ -19,8 +20,8 @@
             <p>
                 A small dashboard for keeping one or more counters, built to exercise a full
                 build-and-deploy pipeline: Spring Boot on the backend, vanilla JavaScript on the
-                front end, packaged by Maven and shipped through CodeBuild, CodeDeploy, and nginx
-                on EC2.
+                front end, packaged by Maven and shipped through CodeBuild, CodeDeploy/EC2, and
+                Elastic Beanstalk.
             </p>
 
             <h2>Keyboard shortcuts</h2>
@@ -30,6 +31,7 @@
                 <li><strong>&darr; / &larr;</strong> &mdash; decrement</li>
                 <li><strong>R</strong> &mdash; reset</li>
             </ul>
+            <p>Double-click a counter's name to rename it.</p>
 
             <h2>How state works</h2>
             <p>
@@ -44,14 +46,19 @@
                 <li>Java 17 + Spring Boot (Web, Thymeleaf, Actuator)</li>
                 <li>Vanilla JavaScript &mdash; no frontend framework or build step</li>
                 <li>Maven for packaging</li>
+                <li>OpenAPI/Swagger docs for the REST API</li>
             </ul>
         </article>
 
         <footer class="site-footer">
             <p>
                 <a href="https://github.com/kantinstephane10/simple-app" target="_blank" rel="noopener">Source on GitHub</a>
+                &middot;
+                <a th:href="@{/swagger-ui.html}">API docs</a>
             </p>
         </footer>
     </div>
+
+    <script th:src="@{/theme.js}"></script>
 </body>
 </html>

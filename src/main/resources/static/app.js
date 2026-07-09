@@ -36,7 +36,7 @@ function counterCardHtml(counter) {
     return `
         <div class="counter-card${justUpdatedClass}" data-id="${counter.id}" style="box-shadow: ${moodShadow(counter.count)}">
             <div class="counter-head">
-                <span class="counter-name">${escapeHtml(counter.name)}</span>
+                <span class="counter-name" title="Double-click to rename">${escapeHtml(counter.name)}</span>
                 <button type="button" class="remove-btn" aria-label="Remove ${escapeHtml(counter.name)}">&times;</button>
             </div>
             <p class="count">${counter.count}</p>
@@ -180,6 +180,58 @@ countersEl.addEventListener('click', (event) => {
             .catch((err) => showToast(err.message));
     }
 });
+
+countersEl.addEventListener('dblclick', (event) => {
+    const nameEl = event.target.closest('.counter-name');
+    if (nameEl) {
+        startRename(nameEl);
+    }
+});
+
+function startRename(nameEl) {
+    const card = nameEl.closest('.counter-card');
+    const id = card.dataset.id;
+    const currentName = nameEl.textContent;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'counter-name-input';
+    input.maxLength = 40;
+    input.value = currentName;
+    nameEl.replaceWith(input);
+    input.focus();
+    input.select();
+
+    let settled = false;
+    const commit = async () => {
+        if (settled) return;
+        settled = true;
+        const newName = input.value.trim();
+        if (newName && newName !== currentName) {
+            try {
+                await api(`/api/counters/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: newName }),
+                });
+            } catch (err) {
+                showToast(err.message);
+            }
+        }
+        loadAll();
+    };
+
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            input.blur();
+        } else if (event.key === 'Escape') {
+            settled = true;
+            loadAll();
+        }
+    });
+}
 
 addForm.addEventListener('submit', (event) => {
     event.preventDefault();

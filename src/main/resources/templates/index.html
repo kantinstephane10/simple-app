@@ -10,6 +10,7 @@
         <header class="top-bar">
             <h1>Simple Counter App</h1>
             <nav>
+                <button type="button" id="theme-toggle" class="theme-toggle">Dark mode</button>
                 <a th:href="@{/about}">About</a>
             </nav>
         </header>
@@ -33,12 +34,15 @@
             <a href="https://github.com/kantinstephane10/simple-app" target="_blank" rel="noopener">Source on GitHub</a>
             &middot;
             <a th:href="@{/actuator/health}">Health</a>
+            &middot;
+            <a th:href="@{/swagger-ui.html}">API docs</a>
         </p>
     </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <canvas id="confetti"></canvas>
 
+    <script th:src="@{/theme.js}"></script>
     <script th:src="@{/app.js}"></script>
 </body>
 </html>
