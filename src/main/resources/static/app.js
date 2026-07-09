@@ -1,85 +1,19 @@
-const countersEl = document.getElementById('counters');
-const activityListEl = document.getElementById('activity-list');
-const addForm = document.getElementById('add-counter-form');
-const newCounterNameInput = document.getElementById('new-counter-name');
+const booksBody = document.getElementById('books-body');
+const emptyState = document.getElementById('empty-state');
+const addForm = document.getElementById('add-book-form');
+const searchForm = document.getElementById('search-form');
+const searchInput = document.getElementById('search-input');
+const clearSearchBtn = document.getElementById('clear-search');
 const toast = document.getElementById('toast');
-const canvas = document.getElementById('confetti');
-const ctx = canvas.getContext('2d');
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-let activeCounterId = null;
-let justUpdatedId = null;
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-function moodShadow(count) {
-    const magnitude = Math.min(Math.abs(count), 50);
-    const hue = count >= 0 ? 150 - magnitude : 10 + magnitude;
-    const alpha = (0.15 + (magnitude / 50) * 0.35).toFixed(2);
-    return `0 12px 30px var(--card-shadow), 0 0 0 3px hsl(${hue} 70% 55% / ${alpha})`;
-}
 
 function escapeHtml(value) {
     const div = document.createElement('div');
-    div.textContent = value;
+    div.textContent = value == null ? '' : String(value);
     return div.innerHTML;
 }
 
-function counterCardHtml(counter) {
-    const justUpdatedClass = counter.id === justUpdatedId ? ' just-updated' : '';
-    return `
-        <div class="counter-card${justUpdatedClass}" data-id="${counter.id}" style="box-shadow: ${moodShadow(counter.count)}">
-            <div class="counter-head">
-                <span class="counter-name" title="Double-click to rename">${escapeHtml(counter.name)}</span>
-                <button type="button" class="remove-btn" aria-label="Remove ${escapeHtml(counter.name)}">&times;</button>
-            </div>
-            <p class="count">${counter.count}</p>
-            <div class="actions">
-                <button type="button" class="dec" aria-label="Decrement">-</button>
-                <button type="button" class="reset">Reset</button>
-                <button type="button" class="inc" aria-label="Increment">+</button>
-            </div>
-            <p class="stats">Best ${counter.best} &middot; Clicks ${counter.totalClicks}</p>
-        </div>
-    `;
-}
-
-function renderCounters(counters) {
-    countersEl.innerHTML = counters.map(counterCardHtml).join('');
-    if (!counters.some((c) => c.id === activeCounterId)) {
-        activeCounterId = counters.length ? counters[0].id : null;
-    }
-}
-
-function timeAgo(timestamp) {
-    const seconds = Math.max(0, Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000));
-    if (seconds < 5) return 'just now';
-    if (seconds < 60) return `${seconds}s ago`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    return `${hours}h ago`;
-}
-
-function renderActivity(entries) {
-    if (!entries.length) {
-        activityListEl.innerHTML = '<li class="activity-empty">No activity yet</li>';
-        return;
-    }
-    activityListEl.innerHTML = entries.map((entry) => `
-        <li>
-            <span class="activity-name">${escapeHtml(entry.counterName)}</span>
-            <span class="activity-action">${escapeHtml(entry.action)}</span>
-            <span class="activity-result">&rarr; ${entry.resultingCount}</span>
-            <span class="activity-time">${timeAgo(entry.timestamp)}</span>
-        </li>
-    `).join('');
+function formatPrice(price) {
+    return Number(price).toFixed(2);
 }
 
 let toastTimeout;
@@ -87,176 +21,157 @@ function showToast(message) {
     toast.textContent = message;
     toast.classList.add('visible');
     clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => toast.classList.remove('visible'), 1800);
-}
-
-function burstConfetti() {
-    if (prefersReducedMotion) return;
-
-    const colors = ['#f2545b', '#f7b731', '#20bf6b', '#4b7bec', '#a55eea'];
-    const particles = Array.from({ length: 60 }, () => ({
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        vx: (Math.random() - 0.5) * 12,
-        vy: Math.random() * -10 - 4,
-        size: Math.random() * 6 + 4,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        rotation: Math.random() * Math.PI,
-        spin: (Math.random() - 0.5) * 0.3,
-    }));
-
-    const gravity = 0.35;
-    const start = performance.now();
-    const duration = 1400;
-
-    function frame(now) {
-        const elapsed = now - start;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach((p) => {
-            p.vy += gravity;
-            p.x += p.vx;
-            p.y += p.vy;
-            p.rotation += p.spin;
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(p.rotation);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
-            ctx.restore();
-        });
-        if (elapsed < duration) {
-            requestAnimationFrame(frame);
-        } else {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-    }
-    requestAnimationFrame(frame);
+    toastTimeout = setTimeout(() => toast.classList.remove('visible'), 2200);
 }
 
 async function api(path, options) {
     const response = await fetch(path, options);
     if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || `Request to ${path} failed: ${response.status}`);
+        const contentType = response.headers.get('content-type') || '';
+        let message = `Request failed: ${response.status}`;
+        if (contentType.includes('application/json')) {
+            const body = await response.json();
+            message = typeof body === 'object' ? Object.values(body).join(', ') : String(body);
+        } else {
+            const text = await response.text();
+            if (text) message = text;
+        }
+        throw new Error(message);
     }
     return response.status === 204 ? null : response.json();
 }
 
-async function loadAll() {
-    const [counters, activity] = await Promise.all([
-        api('/api/counters'),
-        api('/api/counters/activity'),
-    ]);
-    renderCounters(counters);
-    renderActivity(activity);
+function rowHtml(book) {
+    return `
+        <tr data-id="${book.id}">
+            <td class="col-title">${escapeHtml(book.title)}</td>
+            <td>${escapeHtml(book.author)}</td>
+            <td>${escapeHtml(book.isbn)}</td>
+            <td class="col-num">${formatPrice(book.price)}</td>
+            <td class="col-num">${book.stock}</td>
+            <td>${escapeHtml(book.category || '')}</td>
+            <td class="col-actions">
+                <button type="button" class="edit-btn">Edit</button>
+                <button type="button" class="delete-btn">Delete</button>
+            </td>
+        </tr>
+    `;
 }
 
-async function act(id, action) {
-    const counter = await api(`/api/counters/${id}/${action}`, { method: 'POST' });
-    activeCounterId = id;
-    justUpdatedId = id;
-    await loadAll();
-    if (counter.milestone) {
-        showToast(`${counter.name}: milestone reached (${counter.count})`);
-        burstConfetti();
+function renderBooks(books) {
+    booksBody.innerHTML = books.map(rowHtml).join('');
+    emptyState.hidden = books.length > 0;
+}
+
+async function loadBooks(search) {
+    const query = search ? `?q=${encodeURIComponent(search)}` : '';
+    const books = await api(`/api/books${query}`);
+    renderBooks(books);
+}
+
+addForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(addForm);
+    const payload = {
+        title: formData.get('title').trim(),
+        author: formData.get('author').trim(),
+        isbn: formData.get('isbn').trim(),
+        price: Number(formData.get('price')),
+        stock: Number(formData.get('stock')),
+        category: formData.get('category').trim() || null,
+    };
+    try {
+        await api('/api/books', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        addForm.reset();
+        showToast(`Added "${payload.title}"`);
+        loadBooks(searchInput.value.trim());
+    } catch (err) {
+        showToast(err.message);
     }
-}
+});
 
-countersEl.addEventListener('click', (event) => {
-    const card = event.target.closest('.counter-card');
-    if (!card) return;
-    const id = card.dataset.id;
-    activeCounterId = id;
+searchForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    loadBooks(searchInput.value.trim());
+});
 
-    if (event.target.closest('.inc')) {
-        act(id, 'increment');
-    } else if (event.target.closest('.dec')) {
-        act(id, 'decrement');
-    } else if (event.target.closest('.reset')) {
-        act(id, 'reset');
-    } else if (event.target.closest('.remove-btn')) {
-        api(`/api/counters/${id}`, { method: 'DELETE' })
-            .then(loadAll)
+clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    loadBooks();
+});
+
+booksBody.addEventListener('click', (event) => {
+    const row = event.target.closest('tr');
+    if (!row) return;
+    const id = row.dataset.id;
+
+    if (event.target.closest('.delete-btn')) {
+        if (!confirm('Delete this book?')) return;
+        api(`/api/books/${id}`, { method: 'DELETE' })
+            .then(() => {
+                showToast('Book deleted');
+                loadBooks(searchInput.value.trim());
+            })
             .catch((err) => showToast(err.message));
+    } else if (event.target.closest('.edit-btn')) {
+        startEdit(row);
     }
 });
 
-countersEl.addEventListener('dblclick', (event) => {
-    const nameEl = event.target.closest('.counter-name');
-    if (nameEl) {
-        startRename(nameEl);
-    }
-});
-
-function startRename(nameEl) {
-    const card = nameEl.closest('.counter-card');
-    const id = card.dataset.id;
-    const currentName = nameEl.textContent;
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'counter-name-input';
-    input.maxLength = 40;
-    input.value = currentName;
-    nameEl.replaceWith(input);
-    input.focus();
-    input.select();
-
-    let settled = false;
-    const commit = async () => {
-        if (settled) return;
-        settled = true;
-        const newName = input.value.trim();
-        if (newName && newName !== currentName) {
-            try {
-                await api(`/api/counters/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: newName }),
-                });
-            } catch (err) {
-                showToast(err.message);
-            }
-        }
-        loadAll();
+function startEdit(row) {
+    const id = row.dataset.id;
+    const cells = row.querySelectorAll('td');
+    const current = {
+        title: cells[0].textContent,
+        author: cells[1].textContent,
+        isbn: cells[2].textContent,
+        price: cells[3].textContent,
+        stock: cells[4].textContent,
+        category: cells[5].textContent,
     };
 
-    input.addEventListener('blur', commit);
-    input.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            input.blur();
-        } else if (event.key === 'Escape') {
-            settled = true;
-            loadAll();
+    row.innerHTML = `
+        <td><input type="text" class="edit-title" value="${escapeHtml(current.title)}" maxlength="255"></td>
+        <td><input type="text" class="edit-author" value="${escapeHtml(current.author)}" maxlength="255"></td>
+        <td><input type="text" class="edit-isbn" value="${escapeHtml(current.isbn)}" maxlength="32"></td>
+        <td><input type="number" class="edit-price" value="${current.price}" step="0.01" min="0"></td>
+        <td><input type="number" class="edit-stock" value="${current.stock}" step="1" min="0"></td>
+        <td><input type="text" class="edit-category" value="${escapeHtml(current.category)}" maxlength="100"></td>
+        <td class="col-actions">
+            <button type="button" class="save-btn">Save</button>
+            <button type="button" class="cancel-btn">Cancel</button>
+        </td>
+    `;
+
+    row.querySelector('.save-btn').addEventListener('click', async () => {
+        const payload = {
+            title: row.querySelector('.edit-title').value.trim(),
+            author: row.querySelector('.edit-author').value.trim(),
+            isbn: row.querySelector('.edit-isbn').value.trim(),
+            price: Number(row.querySelector('.edit-price').value),
+            stock: Number(row.querySelector('.edit-stock').value),
+            category: row.querySelector('.edit-category').value.trim() || null,
+        };
+        try {
+            await api(`/api/books/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            showToast('Book updated');
+            loadBooks(searchInput.value.trim());
+        } catch (err) {
+            showToast(err.message);
         }
+    });
+
+    row.querySelector('.cancel-btn').addEventListener('click', () => {
+        loadBooks(searchInput.value.trim());
     });
 }
 
-addForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const name = newCounterNameInput.value.trim();
-    newCounterNameInput.value = '';
-    api('/api/counters', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
-    }).then(loadAll);
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.target.tagName === 'INPUT') return;
-    if (!activeCounterId) return;
-
-    if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
-        event.preventDefault();
-        act(activeCounterId, 'increment');
-    } else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
-        event.preventDefault();
-        act(activeCounterId, 'decrement');
-    } else if (event.key === 'r' || event.key === 'R') {
-        act(activeCounterId, 'reset');
-    }
-});
-
-loadAll();
+loadBooks();

@@ -2,29 +2,53 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Simple Counter App</title>
+    <title>Bookshop</title>
     <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 <body>
     <div class="page">
         <header class="top-bar">
-            <h1>Simple Counter App</h1>
+            <h1>Bookshop</h1>
             <nav>
                 <button type="button" id="theme-toggle" class="theme-toggle">Dark mode</button>
-                <a th:href="@{/about}">About</a>
             </nav>
         </header>
 
-        <form id="add-counter-form" class="add-counter">
-            <input type="text" id="new-counter-name" placeholder="New counter name" maxlength="40" autocomplete="off">
-            <button type="submit">Add counter</button>
+        <form id="search-form" class="search-bar">
+            <input type="text" id="search-input" placeholder="Search by title or author" autocomplete="off">
+            <button type="submit">Search</button>
+            <button type="button" id="clear-search">Clear</button>
         </form>
 
-        <div class="counters" id="counters"></div>
+        <section class="add-book">
+            <h2>Add a book</h2>
+            <form id="add-book-form" class="book-form">
+                <input type="text" name="title" placeholder="Title" required maxlength="255">
+                <input type="text" name="author" placeholder="Author" required maxlength="255">
+                <input type="text" name="isbn" placeholder="ISBN" required maxlength="32">
+                <input type="number" name="price" placeholder="Price" step="0.01" min="0" required>
+                <input type="number" name="stock" placeholder="Stock" step="1" min="0" required>
+                <input type="text" name="category" placeholder="Category (optional)" maxlength="100">
+                <button type="submit">Add book</button>
+            </form>
+        </section>
 
-        <section class="activity">
-            <h2>Recent activity</h2>
-            <ul class="activity-list" id="activity-list"></ul>
+        <section class="catalog">
+            <table class="book-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>ISBN</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Category</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="books-body"></tbody>
+            </table>
+            <p id="empty-state" class="empty-state" hidden>No books yet — add one above.</p>
         </section>
     </div>
 
@@ -40,7 +64,6 @@
     </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <canvas id="confetti"></canvas>
 
     <script th:src="@{/theme.js}"></script>
     <script th:src="@{/app.js}"></script>

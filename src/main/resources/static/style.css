@@ -3,13 +3,13 @@
     --page-fg: #2b2f36;
     --card-bg: #ffffff;
     --card-shadow: rgba(0, 0, 0, 0.12);
-    --count-color: #1a1a1a;
     --btn-border: #c7cede;
     --btn-bg: #f4f6fb;
     --btn-bg-hover: #e5eaf7;
     --btn-bg-active: #d3dcf3;
     --btn-text: #2b2f36;
     --accent: #46567a;
+    --row-hover: rgba(70, 86, 122, 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,13 +18,13 @@
         --page-fg: #e7e9ee;
         --card-bg: #21232a;
         --card-shadow: rgba(0, 0, 0, 0.5);
-        --count-color: #f5f6f8;
         --btn-border: #3a3f4c;
         --btn-bg: #2b2e38;
         --btn-bg-hover: #343846;
         --btn-bg-active: #3d4152;
         --btn-text: #e7e9ee;
         --accent: #8fa3d6;
+        --row-hover: rgba(143, 163, 214, 0.08);
     }
 }
 
@@ -33,13 +33,13 @@
     --page-fg: #e7e9ee;
     --card-bg: #21232a;
     --card-shadow: rgba(0, 0, 0, 0.5);
-    --count-color: #f5f6f8;
     --btn-border: #3a3f4c;
     --btn-bg: #2b2e38;
     --btn-bg-hover: #343846;
     --btn-bg-active: #3d4152;
     --btn-text: #e7e9ee;
     --accent: #8fa3d6;
+    --row-hover: rgba(143, 163, 214, 0.08);
 }
 
 :root[data-theme="light"] {
@@ -47,13 +47,13 @@
     --page-fg: #2b2f36;
     --card-bg: #ffffff;
     --card-shadow: rgba(0, 0, 0, 0.12);
-    --count-color: #1a1a1a;
     --btn-border: #c7cede;
     --btn-bg: #f4f6fb;
     --btn-bg-hover: #e5eaf7;
     --btn-bg-active: #d3dcf3;
     --btn-text: #2b2f36;
     --accent: #46567a;
+    --row-hover: rgba(70, 86, 122, 0.06);
 }
 
 * {
@@ -73,7 +73,7 @@ body {
 .page {
     flex: 1;
     width: 100%;
-    max-width: 720px;
+    max-width: 920px;
     margin: 0 auto;
     padding: 32px 20px 16px;
     display: flex;
@@ -94,24 +94,6 @@ body {
     font-weight: 600;
 }
 
-.top-bar nav {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.top-bar nav a,
-.about-card a {
-    color: var(--accent);
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.top-bar nav a:hover,
-.about-card a:hover {
-    text-decoration: underline;
-}
-
 .theme-toggle {
     font-family: inherit;
     font-size: 13px;
@@ -127,207 +109,139 @@ body {
     background: var(--btn-bg-hover);
 }
 
-.add-counter {
-    display: flex;
-    gap: 8px;
+input,
+button {
+    font-family: inherit;
 }
 
-.add-counter input {
-    flex: 1;
-    padding: 10px 12px;
+input[type="text"],
+input[type="number"] {
+    padding: 9px 12px;
     font-size: 14px;
     border: 1px solid var(--btn-border);
     border-radius: 6px;
     background: var(--card-bg);
     color: var(--page-fg);
-    font-family: inherit;
 }
 
-.add-counter input:focus-visible,
+input:focus-visible,
 button:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
-.add-counter button,
-.counters button {
-    font-family: inherit;
+button {
     cursor: pointer;
     border: 1px solid var(--btn-border);
     border-radius: 6px;
     background: var(--btn-bg);
     color: var(--btn-text);
-}
-
-.add-counter button {
-    padding: 10px 16px;
+    padding: 9px 16px;
     font-size: 14px;
-    white-space: nowrap;
 }
 
-.add-counter button:hover {
+button:hover {
     background: var(--btn-bg-hover);
 }
 
-.counters {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-}
-
-.counter-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 20px 22px;
-    text-align: center;
-    transition: box-shadow 0.3s ease;
-}
-
-@keyframes pop {
-    0% { transform: scale(1.08); }
-    100% { transform: scale(1); }
-}
-
-.counter-card.just-updated .count {
-    animation: pop 0.2s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .counter-card {
-        transition: none;
-    }
-    .counter-card.just-updated .count {
-        animation: none;
-    }
-}
-
-.counter-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-}
-
-.counter-name {
-    font-size: 14px;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: text;
-}
-
-.counter-name-input {
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    width: 100%;
-    padding: 2px 4px;
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    background: var(--card-bg);
-    color: var(--page-fg);
-}
-
-.remove-btn {
-    border: none;
-    background: none;
-    color: var(--page-fg);
-    opacity: 0.4;
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 2px 6px;
-}
-
-.remove-btn:hover {
-    opacity: 1;
-}
-
-.count {
-    font-size: 44px;
-    font-weight: 700;
-    margin: 0 0 16px;
-    color: var(--count-color);
-    font-variant-numeric: tabular-nums;
-}
-
-.actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
-}
-
-.counters button {
-    width: 100%;
-    padding: 8px 0;
-    font-size: 14px;
-}
-
-.counters button:hover {
-    background: var(--btn-bg-hover);
-}
-
-.counters button:active {
+button:active {
     background: var(--btn-bg-active);
 }
 
-.stats {
-    margin: 12px 0 0;
-    font-size: 12px;
-    color: var(--page-fg);
-    opacity: 0.65;
-    font-variant-numeric: tabular-nums;
+.search-bar {
+    display: flex;
+    gap: 8px;
 }
 
-.activity h2 {
+.search-bar input {
+    flex: 1;
+}
+
+.add-book {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px 22px;
+    box-shadow: 0 8px 20px var(--card-shadow);
+}
+
+.add-book h2 {
     font-size: 15px;
-    margin: 0 0 10px;
+    margin: 0 0 14px;
     font-weight: 600;
 }
 
-.activity-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+.book-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.book-form button {
+    grid-column: 1 / -1;
+    justify-self: start;
+}
+
+.catalog {
     background: var(--card-bg);
-    border-radius: 10px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px var(--card-shadow);
     overflow: hidden;
 }
 
-.activity-list li {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    padding: 10px 16px;
-    font-size: 13px;
+.book-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.book-table th,
+.book-table td {
+    padding: 10px 14px;
+    text-align: left;
     border-bottom: 1px solid var(--btn-border);
 }
 
-.activity-list li:last-child {
-    border-bottom: none;
-}
-
-.activity-empty {
-    opacity: 0.5;
-}
-
-.activity-name {
+.book-table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.6;
     font-weight: 600;
 }
 
-.activity-action {
-    opacity: 0.75;
+.book-table tbody tr:hover {
+    background: var(--row-hover);
 }
 
-.activity-result {
+.book-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.col-num {
     font-variant-numeric: tabular-nums;
 }
 
-.activity-time {
-    margin-left: auto;
-    opacity: 0.45;
+.col-actions {
     white-space: nowrap;
+    text-align: right;
+}
+
+.col-actions button {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.book-table input {
+    width: 100%;
+    padding: 5px 8px;
+    font-size: 13px;
+}
+
+.empty-state {
+    padding: 24px;
+    text-align: center;
+    opacity: 0.55;
+    font-size: 14px;
 }
 
 .site-footer {
@@ -339,13 +253,6 @@ button:focus-visible {
 
 .site-footer a {
     color: inherit;
-}
-
-#confetti {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 20;
 }
 
 .toast {
@@ -363,6 +270,7 @@ button:focus-visible {
     pointer-events: none;
     box-shadow: 0 8px 20px var(--card-shadow);
     transition: opacity 0.25s ease, transform 0.25s ease;
+    max-width: 80vw;
 }
 
 .toast.visible {
@@ -374,30 +282,4 @@ button:focus-visible {
     .toast {
         transition: none;
     }
-}
-
-.about-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 28px 32px;
-}
-
-.about-card h2 {
-    font-size: 15px;
-    margin: 24px 0 8px;
-}
-
-.about-card h2:first-child {
-    margin-top: 0;
-}
-
-.about-card p,
-.about-card ul {
-    font-size: 14px;
-    line-height: 1.6;
-    margin: 0 0 8px;
-}
-
-.about-card ul {
-    padding-left: 20px;
 }

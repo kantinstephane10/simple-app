@@ -1,54 +1,59 @@
-# Simple App
+# Bookshop App
 
-A small multi-counter dashboard built with Spring Boot. Add as many named counters as you like,
-each tracked independently; every action shows up in an activity feed underneath. The counters
-live in your browser session (each visitor gets their own board) and all updates happen via
-`fetch()` calls to a JSON API — no page reloads.
-
-Extras:
-- Add/remove named counters from the dashboard (at least one always stays)
-- Double-click a counter's name to rename it
-- Activity feed of recent actions across all counters, with relative timestamps
-- Arrow keys (↑/→ to add, ↓/← to subtract) and `R` to reset the last counter you touched
-- Session stats per counter: best value reached and total clicks
-- A confetti burst and toast whenever a counter hits a multiple of 10
-- Each card's glow shifts hue/intensity with its count (green as it climbs, warm as it drops below zero)
-- Manual light/dark theme toggle (persisted in `localStorage`), on top of following the OS by default
-- An [/about](src/main/resources/templates/about.html) page with shortcuts and tech stack info
-- Interactive API docs via Swagger UI
-- All motion respects `prefers-reduced-motion`
+A small book inventory app: add, edit, search, and delete books. Built with Spring Boot,
+Spring Data JPA, and Flyway-managed schema migrations, backed by MySQL in production
+(RDS) and an in-memory H2 database (in MySQL-compatibility mode, so the same migrations
+and dialect apply) for local development.
 
 ## Endpoints
 
-- `GET /` — the dashboard
-- `GET /about` — about page
-- `GET /api/counters` — all counters in the session as JSON
-- `POST /api/counters` — create a counter (JSON body `{"name": "..."}`, name optional)
-- `PUT /api/counters/{id}` — rename a counter (JSON body `{"name": "..."}`, required, ≤ 40 chars)
-- `DELETE /api/counters/{id}` — remove a counter (fails with 409 if it's the last one)
-- `POST /api/counters/{id}/increment` / `/decrement` / `/reset` — update a counter
-- `GET /api/counters/activity` — recent activity log
-- `GET /actuator/health` — health check for load balancers / deployment validation
-- `GET /actuator/info` — basic app metadata
+- `GET /` — the catalog UI
+- `GET /api/books` — list books (optional `?q=` search by title/author)
+- `GET /api/books/{id}` — get one book
+- `POST /api/books` — create a book (JSON body: `title`, `author`, `isbn`, `price`, `stock`, `category`)
+- `PUT /api/books/{id}` — update a book
+- `DELETE /api/books/{id}` — delete a book
+- `GET /actuator/health` — health check
 - `GET /swagger-ui.html` — interactive API docs (OpenAPI)
 
-## Requirements
+## Local development
 
-- JDK 17 or later
-- Maven
-
-## Build & Run
+Requires JDK 17 and Maven. No database setup needed — the `dev` profile (active by
+default) uses an in-memory H2 database.
 
 ```bash
 mvn spring-boot:run
 ```
 
-Then open [http://localhost:5000](http://localhost:5000) in your browser (the app listens on 5000 by
-default; set the `PORT` environment variable to override).
+Open [http://localhost:5000](http://localhost:5000). The app listens on port 5000 by
+default (override with the `PORT` env var) — this matches what Elastic Beanstalk's
+Corretto platform expects in production, so there's no port mismatch between local dev
+and the deployed environment.
+
+## Production configuration
+
+The `prod` profile (activate via `SPRING_PROFILES_ACTIVE=prod`) expects these
+environment variables — none of which are ever committed to source:
+
+| Variable | Example |
+|---|---|
+| `SPRING_DATASOURCE_URL` | `jdbc:mysql://<rds-endpoint>:3306/bookshop` |
+| `SPRING_DATASOURCE_USERNAME` | from RDS master credentials (Secrets Manager) |
+| `SPRING_DATASOURCE_PASSWORD` | from RDS master credentials (Secrets Manager) |
+
+Flyway runs automatically on startup and manages the schema — no manual `CREATE TABLE`
+step required against RDS. See `src/main/resources/db/migration/`.
 
 ## Build a runnable jar
 
 ```bash
 mvn clean package
-java -jar target/simple-app-1.0.0.jar
+java -jar target/bookshop-app-1.0.0.jar
 ```
+
+## CI/CD
+
+`buildspec.yml` runs the Maven build and test suite, then an OWASP Dependency-Check
+scan (fails the build on any dependency with a known CVE at CVSS ≥ 9), then packages
+`app.jar` + `Procfile` for deployment to Elastic Beanstalk. See the pipeline for the
+full source → build/scan → manual approval → deploy flow.

@@ -6,13 +6,16 @@ phases:
       java: corretto17
   build:
     commands:
-      - mvn -B clean package -DskipTests
-      - cp target/simple-app-*.jar target/app.jar
-      - chmod +x scripts/*.sh
+      # Compile and run the test suite (fails the build on any test failure).
+      - mvn -B clean verify
+      # DevSecOps gate: fail the build if any dependency has a known CVE with
+      # CVSS >= 9 (configured in pom.xml). Report is left in
+      # target/dependency-check-report.html for manual review either way.
+      - mvn -B org.owasp:dependency-check-maven:check
+      - cp target/bookshop-app-*.jar app.jar
 
 artifacts:
   files:
-    - target/app.jar
-    - appspec.yml
-    - scripts/*
-  discard-paths: no
+    - app.jar
+    - Procfile
+  discard-paths: yes
